@@ -285,6 +285,7 @@ public final class ReaperApplication extends Application<ReaperApplicationConfig
       flyway.setLocations("/db/postgres");
     }
     flyway.setBaselineOnMigrate(true);
+    flyway.repair();
     flyway.migrate();
   }
 }
