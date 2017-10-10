@@ -181,8 +181,8 @@ public final class RepairScheduleResource {
       if (jobThreadsStr.isPresent()) {
         jobThreads = Integer.valueOf(jobThreadsStr.get());
       } else {
-        jobThreads = 1;
-        LOG.debug("no jobThreads given, so using default value: 1");
+        jobThreads = context.config.getDefaultJobThreadCount();
+        LOG.debug("no jobThreads given, so using default value: {}", jobThreads);
       }
 
       Boolean incrementalRepair = isIncrementalRepair(incrementalRepairStr);
