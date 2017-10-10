@@ -82,8 +82,7 @@ public final class CommonTools {
       String owner,
       int segments,
       RepairParallelism repairParallelism,
-      Double intensity,
-      int jobThreads)
+      Double intensity)
       throws ReaperException {
 
     // preparing a repair run involves several steps
@@ -96,7 +95,7 @@ public final class CommonTools {
     segments = repairUnit.getIncrementalRepair() ? nodes.keySet().size() : tokenSegments.size();
 
     RepairRun.Builder runBuilder
-        = createNewRepairRun(cluster, repairUnit, cause, owner, segments, repairParallelism, intensity, jobThreads);
+        = createNewRepairRun(cluster, repairUnit, cause, owner, segments, repairParallelism, intensity);
 
     // the last preparation step is to generate actual repair segments
     List<RepairSegment.Builder> segmentBuilders = repairUnit.getIncrementalRepair()
@@ -224,12 +223,11 @@ public final class CommonTools {
       String owner,
       int segments,
       RepairParallelism repairParallelism,
-      Double intensity,
-      int jobThreads)
+      Double intensity)
       throws ReaperException {
 
     return new RepairRun.Builder(
-        cluster.getName(), repairUnit.getId(), DateTime.now(), intensity, segments, repairParallelism, jobThreads)
+        cluster.getName(), repairUnit.getId(), DateTime.now(), intensity, segments, repairParallelism)
         .cause(cause.isPresent() ? cause.get() : "no cause specified")
         .owner(owner);
   }

@@ -233,8 +233,7 @@ public final class RepairRunResource {
       }
 
       final RepairRun newRepairRun = CommonTools
-          .registerRepairRun(context, cluster, theRepairUnit, cause, owner.get(), segments, parallelism, intensity,
-                             jobThreads);
+          .registerRepairRun(context, cluster, theRepairUnit, cause, owner.get(), segments, parallelism, intensity);
 
       return Response.created(buildRepairRunUri(uriInfo, newRepairRun))
           .entity(new RepairRunStatus(newRepairRun, theRepairUnit, 0))

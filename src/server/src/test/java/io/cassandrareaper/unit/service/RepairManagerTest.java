@@ -84,8 +84,7 @@ public class RepairManagerTest {
 
     final RepairRun run =
         new RepairRun.Builder(
-                clusterName, cf.getId(), DateTime.now(), intensity, 1, RepairParallelism.PARALLEL,
-                jobThreads)
+                clusterName, cf.getId(), DateTime.now(), intensity, 1, RepairParallelism.PARALLEL)
             .build(UUIDs.timeBased());
 
     final RepairSegment segment =
@@ -149,8 +148,7 @@ public class RepairManagerTest {
 
     final RepairRun run =
         new RepairRun.Builder(
-                clusterName, cf.getId(), DateTime.now(), intensity, 1, RepairParallelism.PARALLEL,
-                jobThreads)
+                clusterName, cf.getId(), DateTime.now(), intensity, 1, RepairParallelism.PARALLEL)
             .build(UUIDs.timeBased());
 
     final RepairSegment segment =
@@ -216,8 +214,7 @@ public class RepairManagerTest {
 
     final RepairRun run =
         new RepairRun.Builder(
-                clusterName, cf.getId(), DateTime.now(), intensity, 1, RepairParallelism.PARALLEL,
-                jobThreads)
+                clusterName, cf.getId(), DateTime.now(), intensity, 1, RepairParallelism.PARALLEL)
             .build(UUIDs.timeBased());
 
     final RepairSegment segment =
@@ -280,8 +277,7 @@ public class RepairManagerTest {
 
     final RepairRun run =
         new RepairRun.Builder(
-                clusterName, cf.getId(), DateTime.now(), intensity, 1, RepairParallelism.PARALLEL,
-                jobThreads)
+                clusterName, cf.getId(), DateTime.now(), intensity, 1, RepairParallelism.PARALLEL)
             .build(UUIDs.timeBased());
 
     final RepairSegment segment =

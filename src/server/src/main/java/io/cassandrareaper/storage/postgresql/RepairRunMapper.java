@@ -48,8 +48,7 @@ public final class RepairRunMapper implements ResultSetMapper<RepairRun> {
         getDateTimeOrNull(rs, "creation_time"),
         rs.getFloat("intensity"),
         rs.getInt("segment_count"),
-        repairParallelism,
-        rs.getInt("job_threads"));
+        repairParallelism);
 
     return repairRunBuilder
         .runState(runState)
