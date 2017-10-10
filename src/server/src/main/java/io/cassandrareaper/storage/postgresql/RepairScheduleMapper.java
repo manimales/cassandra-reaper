@@ -14,18 +14,17 @@
 
 package io.cassandrareaper.storage.postgresql;
 
+import com.google.common.collect.ImmutableList;
 import io.cassandrareaper.core.RepairSchedule;
+import org.apache.cassandra.repair.RepairParallelism;
+import org.skife.jdbi.v2.StatementContext;
+import org.skife.jdbi.v2.tweak.ResultSetMapper;
 
 import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.UUID;
-
-import com.google.common.collect.ImmutableList;
-import org.apache.cassandra.repair.RepairParallelism;
-import org.skife.jdbi.v2.StatementContext;
-import org.skife.jdbi.v2.tweak.ResultSetMapper;
 
 public final class RepairScheduleMapper implements ResultSetMapper<RepairSchedule> {
 
@@ -71,7 +70,8 @@ public final class RepairScheduleMapper implements ResultSetMapper<RepairSchedul
         RepairParallelism.fromName(
             rs.getString("repair_parallelism").toLowerCase().replace("datacenter_aware", "dc_parallel")),
         rs.getDouble("intensity"),
-        RepairRunMapper.getDateTimeOrNull(rs, "creation_time"))
+        RepairRunMapper.getDateTimeOrNull(rs, "creation_time"),
+        rs.getInt("job_threads"))
         .owner(rs.getString("owner"))
         .pauseTime(RepairRunMapper.getDateTimeOrNull(rs, "pause_time"))
         .build(UuidUtil.fromSequenceId(rs.getLong("id")));

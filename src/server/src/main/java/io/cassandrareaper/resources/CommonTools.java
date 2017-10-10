@@ -14,31 +14,6 @@
 
 package io.cassandrareaper.resources;
 
-import io.cassandrareaper.AppContext;
-import io.cassandrareaper.ReaperException;
-import io.cassandrareaper.core.Cluster;
-import io.cassandrareaper.core.RepairRun;
-import io.cassandrareaper.core.RepairSchedule;
-import io.cassandrareaper.core.RepairSegment;
-import io.cassandrareaper.core.RepairUnit;
-import io.cassandrareaper.jmx.JmxProxy;
-import io.cassandrareaper.service.RingRange;
-import io.cassandrareaper.service.SegmentGenerator;
-
-import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Optional;
@@ -48,11 +23,24 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import io.cassandrareaper.AppContext;
+import io.cassandrareaper.ReaperException;
+import io.cassandrareaper.core.*;
+import io.cassandrareaper.jmx.JmxProxy;
+import io.cassandrareaper.service.RingRange;
+import io.cassandrareaper.service.SegmentGenerator;
 import org.apache.cassandra.repair.RepairParallelism;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nullable;
+import java.math.BigInteger;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -313,7 +301,8 @@ public final class CommonTools {
       String owner,
       int segments,
       RepairParallelism repairParallelism,
-      Double intensity)
+      Double intensity,
+      Integer jobThreads)
       throws ReaperException {
 
     RepairSchedule.Builder scheduleBuilder = new RepairSchedule.Builder(
@@ -325,7 +314,8 @@ public final class CommonTools {
         segments,
         repairParallelism,
         intensity,
-        DateTime.now());
+        DateTime.now(),
+        jobThreads);
 
     scheduleBuilder.owner(owner);
 
@@ -452,7 +442,8 @@ public final class CommonTools {
       Set<String> tableNames,
       Boolean incrementalRepair,
       Set<String> nodesToRepair,
-      Set<String> datacenters)
+      Set<String> datacenters,
+      Integer jobThreads)
       throws ReaperException {
 
     Optional<RepairUnit> storedRepairUnit = context.storage.getRepairUnit(cluster.getName(), keyspace, tableNames);
@@ -485,7 +476,8 @@ public final class CommonTools {
           keyspace,
           tableNames,
           nodesToRepair,
-          datacenters);
+          datacenters,
+          jobThreads);
       theRepairUnit = storedRepairUnit.get();
     } else {
       LOG.info(
@@ -494,10 +486,11 @@ public final class CommonTools {
           keyspace,
           tableNames,
           nodesToRepair,
-          datacenters);
+          datacenters,
+          jobThreads);
       theRepairUnit = context.storage.addRepairUnit(
           new RepairUnit.Builder(
-              cluster.getName(), keyspace, tableNames, incrementalRepair, nodesToRepair, datacenters));
+              cluster.getName(), keyspace, tableNames, incrementalRepair, nodesToRepair, datacenters, jobThreads));
     }
     return theRepairUnit;
   }

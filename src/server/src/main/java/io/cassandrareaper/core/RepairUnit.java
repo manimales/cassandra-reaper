@@ -26,6 +26,7 @@ public final class RepairUnit {
   private final Boolean incrementalRepair;
   private final Set<String> nodes;
   private final Set<String> datacenters;
+  private final Integer jobThreads;
 
   private RepairUnit(Builder builder, UUID id) {
     this.id = id;
@@ -35,6 +36,7 @@ public final class RepairUnit {
     this.incrementalRepair = builder.incrementalRepair;
     this.nodes = builder.nodes;
     this.datacenters = builder.datacenters;
+    this.jobThreads = builder.jobThreads;
   }
 
   public UUID getId() {
@@ -65,6 +67,8 @@ public final class RepairUnit {
     return datacenters;
   }
 
+  public Integer getJobThreads() { return jobThreads; }
+
   public Builder with() {
     return new Builder(this);
   }
@@ -77,6 +81,7 @@ public final class RepairUnit {
     public final boolean incrementalRepair;
     public final Set<String> nodes;
     public final Set<String> datacenters;
+    public final Integer jobThreads;
 
     public Builder(
         String clusterName,
@@ -84,13 +89,15 @@ public final class RepairUnit {
         Set<String> columnFamilies,
         Boolean incrementalRepair,
         Set<String> nodes,
-        Set<String> datacenters) {
+        Set<String> datacenters,
+        Integer jobThreads) {
       this.clusterName = clusterName;
       this.keyspaceName = keyspaceName;
       this.columnFamilies = columnFamilies;
       this.incrementalRepair = incrementalRepair;
       this.nodes = nodes;
       this.datacenters = datacenters;
+      this.jobThreads = jobThreads;
     }
 
     private Builder(RepairUnit original) {
@@ -100,6 +107,7 @@ public final class RepairUnit {
       incrementalRepair = original.incrementalRepair;
       nodes = original.nodes;
       datacenters = original.datacenters;
+      jobThreads = original.jobThreads;
     }
 
     public RepairUnit build(UUID id) {

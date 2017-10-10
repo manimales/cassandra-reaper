@@ -80,15 +80,15 @@ CREATE TABLE IF NOT EXISTS repair_run_by_unit (
 CREATE TABLE IF NOT EXISTS repair_schedule_v1 (
   id                 timeuuid PRIMARY KEY,
   repair_unit_id     timeuuid,
-  state              text                    ,
-  days_between       int                ,
+  state              text,
+  days_between       int,
   next_activation    timestamp,
   run_history        set<timeuuid>,
-  segment_count      int                     ,
-  repair_parallelism text                    ,
-  intensity          double                    ,
+  segment_count      int,
+  repair_parallelism text,
+  intensity          double,
   creation_time      timestamp,
-  owner              text                    ,
+  owner              text,
   pause_time         timestamp
 )
   WITH compaction = {'class': 'LeveledCompactionStrategy'}

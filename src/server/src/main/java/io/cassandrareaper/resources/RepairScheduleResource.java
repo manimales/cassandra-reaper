@@ -88,6 +88,7 @@ public final class RepairScheduleResource {
       @QueryParam("segmentCount") Optional<Integer> segmentCount,
       @QueryParam("repairParallelism") Optional<String> repairParallelism,
       @QueryParam("intensity") Optional<String> intensityStr,
+      @QueryParam("jobThreads") Optional<String> jobThreadsStr,
       @QueryParam("incrementalRepair") Optional<String> incrementalRepairStr,
       @QueryParam("scheduleDaysBetween") Optional<Integer> scheduleDaysBetween,
       @QueryParam("scheduleTriggerTime") Optional<String> scheduleTriggerTime,
@@ -105,6 +106,7 @@ public final class RepairScheduleResource {
         segmentCount,
         repairParallelism,
         intensityStr,
+        jobThreadsStr,
         incrementalRepairStr,
         scheduleDaysBetween,
         scheduleTriggerTime);
@@ -118,6 +120,7 @@ public final class RepairScheduleResource {
           segmentCount,
           repairParallelism,
           intensityStr,
+          jobThreadsStr,
           incrementalRepairStr,
           nodesToRepairParam,
           datacentersToRepairParam);
@@ -174,6 +177,14 @@ public final class RepairScheduleResource {
         return Response.status(Response.Status.NOT_FOUND).entity(ex.getMessage()).build();
       }
 
+      Integer jobThreads;
+      if (jobThreadsStr.isPresent()) {
+        jobThreads = Integer.valueOf(jobThreadsStr.get());
+      } else {
+        jobThreads = 1;
+        LOG.debug("no jobThreads given, so using default value: 1");
+      }
+
       Boolean incrementalRepair = isIncrementalRepair(incrementalRepairStr);
 
       RepairUnit theRepairUnit = CommonTools.getNewOrExistingRepairUnit(
@@ -183,7 +194,8 @@ public final class RepairScheduleResource {
           tableNames,
           incrementalRepair,
           nodesToRepair,
-          datacentersToRepair);
+          datacentersToRepair,
+          jobThreads);
 
       if (theRepairUnit.getIncrementalRepair().booleanValue() != incrementalRepair) {
         return Response.status(Response.Status.BAD_REQUEST)
@@ -226,7 +238,8 @@ public final class RepairScheduleResource {
             owner.get(),
             segments,
             parallelism,
-            intensity);
+            intensity,
+            jobThreads);
 
         return Response.created(buildRepairScheduleUri(uriInfo, newRepairSchedule))
             .entity(new RepairScheduleStatus(newRepairSchedule, theRepairUnit))

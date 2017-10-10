@@ -14,28 +14,18 @@
 
 package io.cassandrareaper.storage.postgresql;
 
-import io.cassandrareaper.core.Cluster;
-import io.cassandrareaper.core.RepairRun;
-import io.cassandrareaper.core.RepairSchedule;
-import io.cassandrareaper.core.RepairSegment;
-import io.cassandrareaper.core.RepairUnit;
+import io.cassandrareaper.core.*;
 import io.cassandrareaper.resources.view.RepairRunStatus;
 import io.cassandrareaper.resources.view.RepairScheduleStatus;
 import io.cassandrareaper.service.RepairParameters;
+import org.skife.jdbi.v2.sqlobject.*;
+import org.skife.jdbi.v2.sqlobject.customizers.BatchChunkSize;
+import org.skife.jdbi.v2.sqlobject.customizers.Mapper;
 
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-
-import org.skife.jdbi.v2.sqlobject.Bind;
-import org.skife.jdbi.v2.sqlobject.BindBean;
-import org.skife.jdbi.v2.sqlobject.GetGeneratedKeys;
-import org.skife.jdbi.v2.sqlobject.SqlBatch;
-import org.skife.jdbi.v2.sqlobject.SqlQuery;
-import org.skife.jdbi.v2.sqlobject.SqlUpdate;
-import org.skife.jdbi.v2.sqlobject.customizers.BatchChunkSize;
-import org.skife.jdbi.v2.sqlobject.customizers.Mapper;
 
 /**
  * JDBI based PostgreSQL interface.
@@ -84,12 +74,12 @@ public interface IStoragePostgreSql {
   // RepairUni
   //
   String SQL_REPAIR_UNIT_ALL_FIELDS_NO_ID
-      = "cluster_name, keyspace_name, column_families, incremental_repair, nodes, datacenters";
+      = "cluster_name, keyspace_name, column_families, incremental_repair, nodes, datacenters, job_threads";
   String SQL_REPAIR_UNIT_ALL_FIELDS = "repair_unit.id, " + SQL_REPAIR_UNIT_ALL_FIELDS_NO_ID;
   String SQL_INSERT_REPAIR_UNIT = "INSERT INTO repair_unit ("
       + SQL_REPAIR_UNIT_ALL_FIELDS_NO_ID
       + ") VALUES "
-      + "(:clusterName, :keyspaceName, :columnFamilies, :incrementalRepair, :nodes, :datacenters)";
+      + "(:clusterName, :keyspaceName, :columnFamilies, :incrementalRepair, :nodes, :datacenters, :jobThreads)";
   String SQL_GET_REPAIR_UNIT = "SELECT " + SQL_REPAIR_UNIT_ALL_FIELDS + " FROM repair_unit WHERE id = :id";
 
   String SQL_GET_REPAIR_UNIT_BY_CLUSTER_AND_TABLES = "SELECT "
@@ -149,18 +139,18 @@ public interface IStoragePostgreSql {
   //
   String SQL_REPAIR_SCHEDULE_ALL_FIELDS_NO_ID
       = "repair_unit_id, state, days_between, next_activation, run_history, segment_count, "
-      + "repair_parallelism, intensity, creation_time, owner, pause_time";
+      + "repair_parallelism, intensity, creation_time, owner, pause_time, job_threads";
   String SQL_REPAIR_SCHEDULE_ALL_FIELDS = "repair_schedule.id, " + SQL_REPAIR_SCHEDULE_ALL_FIELDS_NO_ID;
   String SQL_INSERT_REPAIR_SCHEDULE = "INSERT INTO repair_schedule ("
       + SQL_REPAIR_SCHEDULE_ALL_FIELDS_NO_ID
       + ") VALUES "
       + "(:repairUnitId, :state, :daysBetween, :nextActivation, :runHistorySql, :segmentCount, "
-      + ":repairParallelism, :intensity, :creationTime, :owner, :pauseTime)";
+      + ":repairParallelism, :intensity, :creationTime, :owner, :pauseTime, :jobThreads)";
   String SQL_UPDATE_REPAIR_SCHEDULE = "UPDATE repair_schedule SET repair_unit_id = :repairUnitId, state = :state, "
       + "days_between = :daysBetween, next_activation = :nextActivation, "
       + "run_history = :runHistorySql, segment_count = :segmentCount, "
       + "repair_parallelism = :repairParallelism, creation_time = :creationTime, owner = :owner, "
-      + "pause_time = :pauseTime WHERE id = :id";
+      + "pause_time = :pauseTime, job_threads = :jobThreads WHERE id = :id";
   String SQL_GET_REPAIR_SCHEDULE = "SELECT " + SQL_REPAIR_SCHEDULE_ALL_FIELDS + " FROM repair_schedule WHERE id = :id";
   String SQL_GET_REPAIR_SCHEDULES_FOR_CLUSTER = "SELECT "
       + SQL_REPAIR_SCHEDULE_ALL_FIELDS

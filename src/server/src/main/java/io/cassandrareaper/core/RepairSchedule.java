@@ -14,15 +14,15 @@
 
 package io.cassandrareaper.core;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.apache.cassandra.repair.RepairParallelism;
 import org.joda.time.DateTime;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 public final class RepairSchedule {
 
@@ -39,6 +39,7 @@ public final class RepairSchedule {
   private final DateTime creationTime;
   private final String owner;
   private final DateTime pauseTime;
+  private final Integer jobThreads;
 
   private RepairSchedule(Builder builder, UUID id) {
     this.id = id;
@@ -53,6 +54,7 @@ public final class RepairSchedule {
     this.creationTime = builder.creationTime;
     this.owner = builder.owner;
     this.pauseTime = builder.pauseTime;
+    this.jobThreads = builder.jobThreads;
   }
 
   public UUID getId() {
@@ -138,6 +140,7 @@ public final class RepairSchedule {
     private DateTime creationTime;
     private String owner;
     private DateTime pauseTime;
+    private Integer jobThreads;
 
     public Builder(
         UUID repairUnitId,
@@ -148,7 +151,8 @@ public final class RepairSchedule {
         int segmentCount,
         RepairParallelism repairParallelism,
         double intensity,
-        DateTime creationTime) {
+        DateTime creationTime,
+        Integer jobThreads) {
       this.repairUnitId = repairUnitId;
       this.state = state;
       this.daysBetween = daysBetween;
@@ -158,6 +162,7 @@ public final class RepairSchedule {
       this.repairParallelism = repairParallelism;
       this.intensity = intensity;
       this.creationTime = creationTime;
+      this.jobThreads = jobThreads;
     }
 
     private Builder(RepairSchedule original) {
@@ -173,6 +178,7 @@ public final class RepairSchedule {
       owner = original.owner;
       pauseTime = original.pauseTime;
       intensity = original.intensity;
+      jobThreads = original.jobThreads;
     }
 
     public Builder state(State state) {
@@ -222,6 +228,11 @@ public final class RepairSchedule {
 
     public Builder pauseTime(DateTime pauseTime) {
       this.pauseTime = pauseTime;
+      return this;
+    }
+
+    public Builder jobThreads(Integer jobThreads) {
+      this.jobThreads = jobThreads;
       return this;
     }
 

@@ -14,6 +14,9 @@
 
 package io.cassandrareaper.unit.service;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import io.cassandrareaper.AppContext;
 import io.cassandrareaper.ReaperApplicationConfiguration;
 import io.cassandrareaper.ReaperApplicationConfiguration.DatacenterAvailability;
@@ -29,6 +32,13 @@ import io.cassandrareaper.service.RingRange;
 import io.cassandrareaper.service.SegmentRunner;
 import io.cassandrareaper.storage.IStorage;
 import io.cassandrareaper.storage.MemoryStorage;
+import org.apache.cassandra.repair.RepairParallelism;
+import org.apache.cassandra.service.ActiveRepairService;
+import org.apache.commons.lang3.mutable.MutableObject;
+import org.joda.time.DateTime;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.math.BigInteger;
 import java.util.Collections;
@@ -38,23 +48,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import org.apache.cassandra.repair.RepairParallelism;
-import org.apache.cassandra.service.ActiveRepairService;
-import org.apache.commons.lang3.mutable.MutableObject;
-import org.joda.time.DateTime;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -75,7 +70,7 @@ public final class SegmentRunnerTest {
     context.storage = new MemoryStorage();
     RepairUnit cf = context.storage.addRepairUnit(
         new RepairUnit.Builder("reaper", "reaper", Sets.newHashSet("reaper"), false, Sets.newHashSet("127.0.0.1"),
-            Collections.emptySet()));
+            Collections.emptySet(), 2));
     RepairRun run = context.storage.addRepairRun(
         new RepairRun.Builder("reaper", cf.getId(), DateTime.now(), 0.5, 1, RepairParallelism.PARALLEL),
         Collections.singleton(new RepairSegment.Builder(new RingRange(BigInteger.ONE, BigInteger.ZERO), cf.getId())));
@@ -105,7 +100,8 @@ public final class SegmentRunnerTest {
               any(RepairParallelism.class),
               any(),
               anyBoolean(),
-              any()))
+              any(),
+              anyInt()))
             .then((invocation) -> {
 
               assertEquals(
@@ -160,7 +156,7 @@ public final class SegmentRunnerTest {
     final IStorage storage = new MemoryStorage();
     RepairUnit cf = storage.addRepairUnit(
         new RepairUnit.Builder("reaper", "reaper", Sets.newHashSet("reaper"), false, Sets.newHashSet("127.0.0.1"),
-            Collections.emptySet()));
+            Collections.emptySet(), 2));
     RepairRun run = storage.addRepairRun(
         new RepairRun.Builder("reaper", cf.getId(), DateTime.now(), 0.5, 1, RepairParallelism.PARALLEL),
         Collections.singleton(new RepairSegment.Builder(new RingRange(BigInteger.ONE, BigInteger.ZERO), cf.getId())));
@@ -195,7 +191,8 @@ public final class SegmentRunnerTest {
               any(RepairParallelism.class),
               any(),
               anyBoolean(),
-              any()))
+              any(),
+              anyInt()))
             .then(invocation -> {
 
               assertEquals(
@@ -268,7 +265,7 @@ public final class SegmentRunnerTest {
     final IStorage storage = new MemoryStorage();
     RepairUnit cf = storage.addRepairUnit(
         new RepairUnit.Builder("reaper", "reaper", Sets.newHashSet("reaper"), false, Sets.newHashSet("127.0.0.1"),
-            Collections.emptySet()));
+            Collections.emptySet(), 2));
     RepairRun run = storage.addRepairRun(
         new RepairRun.Builder("reaper", cf.getId(), DateTime.now(), 0.5, 1, RepairParallelism.PARALLEL),
         Collections.singleton(new RepairSegment.Builder(new RingRange(BigInteger.ONE, BigInteger.ZERO), cf.getId())));
@@ -303,7 +300,8 @@ public final class SegmentRunnerTest {
               any(RepairParallelism.class),
               any(),
               anyBoolean(),
-              any()))
+              any(),
+              anyInt()))
             .then((invocation) -> {
 
               assertEquals(

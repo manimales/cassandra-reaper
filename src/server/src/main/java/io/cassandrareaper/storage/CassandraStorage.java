@@ -14,47 +14,7 @@
 
 package io.cassandrareaper.storage;
 
-import io.cassandrareaper.AppContext;
-import io.cassandrareaper.ReaperApplicationConfiguration;
-import io.cassandrareaper.core.Cluster;
-import io.cassandrareaper.core.NodeMetrics;
-import io.cassandrareaper.core.RepairRun;
-import io.cassandrareaper.core.RepairRun.Builder;
-import io.cassandrareaper.core.RepairRun.RunState;
-import io.cassandrareaper.core.RepairSchedule;
-import io.cassandrareaper.core.RepairSegment;
-import io.cassandrareaper.core.RepairSegment.State;
-import io.cassandrareaper.core.RepairUnit;
-import io.cassandrareaper.resources.view.RepairRunStatus;
-import io.cassandrareaper.resources.view.RepairScheduleStatus;
-import io.cassandrareaper.service.RepairParameters;
-import io.cassandrareaper.service.RingRange;
-import io.cassandrareaper.storage.cassandra.DateTimeCodec;
-import io.cassandrareaper.storage.cassandra.Migration003;
-
-import java.math.BigInteger;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-
-import com.datastax.driver.core.BatchStatement;
-import com.datastax.driver.core.CodecRegistry;
-import com.datastax.driver.core.ConsistencyLevel;
-import com.datastax.driver.core.PreparedStatement;
-import com.datastax.driver.core.QueryLogger;
-import com.datastax.driver.core.QueryOptions;
-import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.ResultSetFuture;
-import com.datastax.driver.core.Row;
-import com.datastax.driver.core.Session;
-import com.datastax.driver.core.SimpleStatement;
-import com.datastax.driver.core.Statement;
-import com.datastax.driver.core.WriteType;
+import com.datastax.driver.core.*;
 import com.datastax.driver.core.exceptions.DriverException;
 import com.datastax.driver.core.policies.DefaultRetryPolicy;
 import com.datastax.driver.core.policies.DowngradingConsistencyRetryPolicy;
@@ -65,6 +25,19 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Futures;
+import io.cassandrareaper.AppContext;
+import io.cassandrareaper.ReaperApplicationConfiguration;
+import io.cassandrareaper.core.Cluster;
+import io.cassandrareaper.core.*;
+import io.cassandrareaper.core.RepairRun.Builder;
+import io.cassandrareaper.core.RepairRun.RunState;
+import io.cassandrareaper.core.RepairSegment.State;
+import io.cassandrareaper.resources.view.RepairRunStatus;
+import io.cassandrareaper.resources.view.RepairScheduleStatus;
+import io.cassandrareaper.service.RepairParameters;
+import io.cassandrareaper.service.RingRange;
+import io.cassandrareaper.storage.cassandra.DateTimeCodec;
+import io.cassandrareaper.storage.cassandra.Migration003;
 import io.dropwizard.setup.Environment;
 import org.apache.cassandra.repair.RepairParallelism;
 import org.cognitor.cassandra.migration.Database;
@@ -75,6 +48,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import systems.composable.dropwizard.cassandra.CassandraFactory;
 import systems.composable.dropwizard.cassandra.retry.RetryPolicyFactory;
+
+import java.math.BigInteger;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 public final class CassandraStorage implements IStorage, IDistributedStorage {
 
@@ -188,7 +166,7 @@ public final class CassandraStorage implements IStorage, IDistributedStorage {
         + "WHERE id = ? and repair_unit_id= ?");
     insertRepairUnitPrepStmt = session.prepare(
         "INSERT INTO repair_unit_v1(id, cluster_name, keyspace_name, column_families, "
-            + "incremental_repair, nodes, datacenters) VALUES(?, ?, ?, ?, ?, ?, ?)");
+            + "incremental_repair, nodes, datacenters, job_threads) VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
     getRepairUnitPrepStmt = session.prepare("SELECT * FROM repair_unit_v1 WHERE id = ?");
     insertRepairSegmentPrepStmt = session
         .prepare(
@@ -207,8 +185,8 @@ public final class CassandraStorage implements IStorage, IDistributedStorage {
     insertRepairSchedulePrepStmt = session
         .prepare(
             "INSERT INTO repair_schedule_v1(id, repair_unit_id, state, days_between, next_activation, run_history, "
-                + "segment_count, repair_parallelism, intensity, creation_time, owner, pause_time) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+                + "segment_count, repair_parallelism, intensity, creation_time, owner, pause_time, job_threads) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
         .setConsistencyLevel(ConsistencyLevel.QUORUM);
     getRepairSchedulePrepStmt
         = session.prepare("SELECT * FROM repair_schedule_v1 WHERE id = ?").setConsistencyLevel(ConsistencyLevel.QUORUM);
@@ -496,7 +474,8 @@ public final class CassandraStorage implements IStorage, IDistributedStorage {
             repairUnit.getColumnFamilies(),
             repairUnit.getIncrementalRepair(),
             repairUnit.getNodes(),
-            repairUnit.getDatacenters()));
+            repairUnit.getDatacenters(),
+            repairUnit.getJobThreads()));
     return repairUnit;
   }
 
@@ -511,7 +490,8 @@ public final class CassandraStorage implements IStorage, IDistributedStorage {
           repairUnitRow.getSet("column_families", String.class),
           repairUnitRow.getBool("incremental_repair"),
           repairUnitRow.getSet("nodes", String.class),
-          repairUnitRow.getSet("datacenters", String.class))
+          repairUnitRow.getSet("datacenters", String.class),
+          repairUnitRow.getInt("job_threads"))
           .build(id);
     }
     return Optional.fromNullable(repairUnit);
@@ -534,7 +514,8 @@ public final class CassandraStorage implements IStorage, IDistributedStorage {
             repairUnitRow.getSet("column_families", String.class),
             repairUnitRow.getBool("incremental_repair"),
             repairUnitRow.getSet("nodes", String.class),
-            repairUnitRow.getSet("datacenters", String.class))
+            repairUnitRow.getSet("datacenters", String.class),
+            repairUnitRow.getInt("job_threads"))
             .build(repairUnitRow.getUUID("id"));
         // exit the loop once we find a match
         break;
@@ -738,7 +719,8 @@ public final class CassandraStorage implements IStorage, IDistributedStorage {
         repairScheduleRow.getInt("segment_count"),
         RepairParallelism.fromName(repairScheduleRow.getString("repair_parallelism")),
         repairScheduleRow.getDouble("intensity"),
-        new DateTime(repairScheduleRow.getTimestamp("creation_time")))
+        new DateTime(repairScheduleRow.getTimestamp("creation_time")),
+        repairScheduleRow.getInt("job_threads"))
         .owner(repairScheduleRow.getString("owner"))
         .pauseTime(new DateTime(repairScheduleRow.getTimestamp("pause_time")))
         .build(repairScheduleRow.getUUID("id"));

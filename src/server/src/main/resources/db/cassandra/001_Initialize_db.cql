@@ -33,9 +33,9 @@ CREATE TABLE IF NOT EXISTS repair_run (
   start_time         timestamp,
   end_time           timestamp,
   pause_time         timestamp,
-  intensity          double                    ,
-  last_event         text                    ,
-  segment_count      int                     ,
+  intensity          double,
+  last_event         text,
+  segment_count      int,
   repair_parallelism text
 );
 
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS repair_segment (
   run_id           bigint,
   start_token      varint,
   end_token        varint,
-  state            int   ,
+  state            int,
   coordinator_host text,
   start_time       timestamp,
   end_time         timestamp,
@@ -74,15 +74,15 @@ CREATE TABLE IF NOT EXISTS repair_segment_by_run_id (
 CREATE TABLE IF NOT EXISTS repair_schedule (
   id                 bigint PRIMARY KEY,
   repair_unit_id     bigint,
-  state              text                    ,
-  days_between       int                ,
+  state              text,
+  days_between       int,
   next_activation    timestamp,
   run_history        set<bigint>,
-  segment_count      int                     ,
-  repair_parallelism text                    ,
-  intensity          double                    ,
+  segment_count      int,
+  repair_parallelism text,
+  intensity          double,
   creation_time      timestamp,
-  owner              text                    ,
+  owner              text,
   pause_time         timestamp
 );
 

@@ -14,6 +14,11 @@
 
 package io.cassandrareaper.resources;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import io.cassandrareaper.AppContext;
 import io.cassandrareaper.ReaperException;
 import io.cassandrareaper.core.Cluster;
@@ -22,40 +27,22 @@ import io.cassandrareaper.core.RepairRun.RunState;
 import io.cassandrareaper.core.RepairSegment;
 import io.cassandrareaper.core.RepairUnit;
 import io.cassandrareaper.resources.view.RepairRunStatus;
-
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import org.apache.cassandra.repair.RepairParallelism;
+import org.apache.cassandra.repair.messages.RepairOption;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import org.apache.cassandra.repair.RepairParallelism;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -93,6 +80,7 @@ public final class RepairRunResource {
       @QueryParam("segmentCount") Optional<Integer> segmentCount,
       @QueryParam("repairParallelism") Optional<String> repairParallelism,
       @QueryParam("intensity") Optional<String> intensityStr,
+      @QueryParam("jobThreads") Optional<String> jobThreadsStr,
       @QueryParam("incrementalRepair") Optional<String> incrementalRepairStr,
       @QueryParam("nodes") Optional<String> nodesToRepairParam,
       @QueryParam("datacenters") Optional<String> datacentersToRepairParam) {
@@ -109,6 +97,7 @@ public final class RepairRunResource {
         segmentCount,
         repairParallelism,
         intensityStr,
+        jobThreadsStr,
         incrementalRepairStr,
         nodesToRepairParam,
         datacentersToRepairParam);
@@ -121,6 +110,7 @@ public final class RepairRunResource {
           segmentCount,
           repairParallelism,
           intensityStr,
+          jobThreadsStr,
           incrementalRepairStr,
           nodesToRepairParam,
           datacentersToRepairParam);
@@ -134,6 +124,14 @@ public final class RepairRunResource {
       } else {
         intensity = context.config.getRepairIntensity();
         LOG.debug("no intensity given, so using default value: {}", intensity);
+      }
+
+      Integer jobThreads;
+      if (jobThreadsStr.isPresent()) {
+        jobThreads = Integer.valueOf(jobThreadsStr.get());
+      } else {
+        jobThreads = 1;
+        LOG.debug("no jobThreads given, so using default value: 1");
       }
 
       Boolean incrementalRepair;
@@ -193,7 +191,8 @@ public final class RepairRunResource {
           tableNames,
           incrementalRepair,
           nodesToRepair,
-          datacentersToRepair);
+          datacentersToRepair,
+          jobThreads);
 
       if (theRepairUnit.getIncrementalRepair().booleanValue() != incrementalRepair) {
         return Response.status(Response.Status.BAD_REQUEST)
@@ -245,6 +244,7 @@ public final class RepairRunResource {
       Optional<Integer> segmentCount,
       Optional<String> repairParallelism,
       Optional<String> intensityStr,
+      Optional<String> jobThreadsStr,
       Optional<String> incrementalRepairStr,
       Optional<String> nodesStr,
       Optional<String> datacentersStr) {
@@ -284,6 +284,21 @@ public final class RepairRunResource {
         return Response.status(Response.Status.BAD_REQUEST)
             .entity("invalid value for query parameter \"intensity\": " + intensityStr.get())
             .build();
+      }
+    }
+    if (jobThreadsStr.isPresent()) {
+      try {
+        final Integer jobThreads = Integer.valueOf(jobThreadsStr.get());
+        if (jobThreads == null || jobThreads > RepairOption.MAX_JOB_THREADS || jobThreads <= 0) {
+          return Response.status(Response.Status.BAD_REQUEST)
+                  .entity("query parameter \"jobThreads\" must be in range [0, 4]: " + jobThreadsStr.get())
+                  .build();
+        }
+      } catch (NumberFormatException ex) {
+        LOG.error(ex.getMessage(), ex);
+        return Response.status(Response.Status.BAD_REQUEST)
+                .entity("invalid value for query parameter \"jobThreads\": " + jobThreadsStr.get())
+                .build();
       }
     }
     if (incrementalRepairStr.isPresent()

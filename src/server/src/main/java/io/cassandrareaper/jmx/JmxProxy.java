@@ -582,7 +582,8 @@ public final class JmxProxy implements NotificationListener, AutoCloseable {
       RepairParallelism repairParallelism,
       Collection<String> columnFamilies,
       boolean fullRepair,
-      Collection<String> datacenters)
+      Collection<String> datacenters,
+      Integer jobThreads)
       throws ReaperException {
 
     checkNotNull(ssProxy, "Looks like the proxy is not connected");
@@ -642,7 +643,8 @@ public final class JmxProxy implements NotificationListener, AutoCloseable {
             beginToken,
             endToken,
             cassandraVersion,
-            datacenters);
+            datacenters,
+            jobThreads);
       }
     } catch (RuntimeException e) {
       LOG.error("Segment repair failed", e);
@@ -658,14 +660,19 @@ public final class JmxProxy implements NotificationListener, AutoCloseable {
       BigInteger beginToken,
       BigInteger endToken,
       String cassandraVersion,
-      Collection<String> datacenters) {
+      Collection<String> datacenters,
+      Integer jobThreads) {
+
+    if (jobThreads == null || jobThreads > RepairOption.MAX_JOB_THREADS || jobThreads <= 0) {
+      jobThreads = 1;
+    }
 
     Map<String, String> options = new HashMap<>();
 
     options.put(RepairOption.PARALLELISM_KEY, repairParallelism.getName());
     // options.put(RepairOption.PRIMARY_RANGE_KEY, Boolean.toString(primaryRange));
     options.put(RepairOption.INCREMENTAL_KEY, Boolean.toString(!fullRepair));
-    options.put(RepairOption.JOB_THREADS_KEY, Integer.toString(1));
+    options.put(RepairOption.JOB_THREADS_KEY, jobThreads.toString());
     options.put(RepairOption.TRACE_KEY, Boolean.toString(Boolean.FALSE));
     options.put(RepairOption.COLUMNFAMILIES_KEY, StringUtils.join(columnFamilies, ","));
     // options.put(RepairOption.PULL_REPAIR_KEY, Boolean.FALSE);

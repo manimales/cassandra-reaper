@@ -14,22 +14,21 @@
 
 package io.cassandrareaper;
 
-import java.time.Duration;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.DefaultValue;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
 import org.apache.cassandra.repair.RepairParallelism;
 import org.hibernate.validator.constraints.NotEmpty;
 import systems.composable.dropwizard.cassandra.CassandraFactory;
+
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.DefaultValue;
+import java.time.Duration;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public final class ReaperApplicationConfiguration extends Configuration {
 
@@ -62,6 +61,10 @@ public final class ReaperApplicationConfiguration extends Configuration {
   @JsonProperty
   @NotNull
   private Integer repairRunThreadCount;
+
+  @JsonProperty
+  @DefaultValue("2")
+  private Integer defaultJobThreadCount;
 
   @JsonProperty
   @NotNull
@@ -154,6 +157,14 @@ public final class ReaperApplicationConfiguration extends Configuration {
 
   public int getRepairRunThreadCount() {
     return repairRunThreadCount;
+  }
+
+  public int getDefaultJobThreadCount() {
+    return defaultJobThreadCount != null ? defaultJobThreadCount : 2;
+  }
+
+  public void setDefaultJobThreadCount(int defaultJobThreadCount) {
+    this.defaultJobThreadCount = defaultJobThreadCount;
   }
 
   public void setRepairRunThreadCount(int repairRunThreadCount) {

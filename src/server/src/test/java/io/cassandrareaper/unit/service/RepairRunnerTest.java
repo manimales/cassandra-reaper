@@ -14,6 +14,10 @@
 
 package io.cassandrareaper.unit.service;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import io.cassandrareaper.AppContext;
 import io.cassandrareaper.ReaperApplicationConfiguration;
 import io.cassandrareaper.ReaperException;
@@ -24,28 +28,9 @@ import io.cassandrareaper.core.RepairUnit;
 import io.cassandrareaper.jmx.JmxConnectionFactory;
 import io.cassandrareaper.jmx.JmxProxy;
 import io.cassandrareaper.jmx.RepairStatusHandler;
-import io.cassandrareaper.service.RepairManager;
-import io.cassandrareaper.service.RepairRunner;
-import io.cassandrareaper.service.RingRange;
-import io.cassandrareaper.service.SegmentGenerator;
-import io.cassandrareaper.service.SegmentRunner;
+import io.cassandrareaper.service.*;
 import io.cassandrareaper.storage.IStorage;
 import io.cassandrareaper.storage.MemoryStorage;
-
-import java.math.BigInteger;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import org.apache.cassandra.repair.RepairParallelism;
 import org.apache.cassandra.service.ActiveRepairService;
 import org.apache.cassandra.utils.progress.ProgressEventType;
@@ -56,12 +41,16 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigInteger;
+import java.util.*;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -84,12 +73,13 @@ public final class RepairRunnerTest {
     final Set<String> DATACENTERS = Collections.emptySet();
     final long TIME_RUN = 41L;
     final double INTENSITY = 0.5f;
+    final int JOB_THREADS = 2;
 
     final IStorage storage = new MemoryStorage();
 
     storage.addCluster(new Cluster(CLUSTER_NAME, null, Collections.<String>singleton("127.0.0.1")));
     RepairUnit cf = storage
-        .addRepairUnit(new RepairUnit.Builder(CLUSTER_NAME, KS_NAME, CF_NAMES, INCREMENTAL_REPAIR, NODES, DATACENTERS));
+        .addRepairUnit(new RepairUnit.Builder(CLUSTER_NAME, KS_NAME, CF_NAMES, INCREMENTAL_REPAIR, NODES, DATACENTERS, JOB_THREADS));
     DateTimeUtils.setCurrentMillisFixed(TIME_RUN);
     RepairRun run = storage.addRepairRun(
         new RepairRun.Builder(CLUSTER_NAME, cf.getId(), DateTime.now(), INTENSITY, 1, RepairParallelism.PARALLEL),
@@ -129,7 +119,8 @@ public final class RepairRunnerTest {
             any(RepairParallelism.class),
             any(),
             anyBoolean(),
-            any()))
+            any(),
+            anyInt()))
             .then((invocation) -> {
 
               assertEquals(
@@ -227,12 +218,13 @@ public final class RepairRunnerTest {
     final Set<String> DATACENTERS = Collections.emptySet();
     final long TIME_RUN = 41L;
     final double INTENSITY = 0.5f;
+    final int JOB_THREADS = 2;
 
     final IStorage storage = new MemoryStorage();
 
     storage.addCluster(new Cluster(CLUSTER_NAME, null, Collections.<String>singleton("127.0.0.1")));
     RepairUnit cf = storage
-        .addRepairUnit(new RepairUnit.Builder(CLUSTER_NAME, KS_NAME, CF_NAMES, INCREMENTAL_REPAIR, NODES, DATACENTERS));
+        .addRepairUnit(new RepairUnit.Builder(CLUSTER_NAME, KS_NAME, CF_NAMES, INCREMENTAL_REPAIR, NODES, DATACENTERS, JOB_THREADS));
     DateTimeUtils.setCurrentMillisFixed(TIME_RUN);
     RepairRun run = storage.addRepairRun(
         new RepairRun.Builder(CLUSTER_NAME, cf.getId(), DateTime.now(), INTENSITY, 1, RepairParallelism.PARALLEL),
@@ -273,7 +265,8 @@ public final class RepairRunnerTest {
             any(RepairParallelism.class),
             any(),
             anyBoolean(),
-            any()))
+            any(),
+            anyInt()))
             .then((invocation) -> {
 
               assertEquals(
@@ -347,6 +340,7 @@ public final class RepairRunnerTest {
     final Set<String> DATACENTERS = Collections.emptySet();
     final long TIME_RUN = 41L;
     final double INTENSITY = 0.5f;
+    final int JOB_THREADS = 2;
 
     final IStorage storage = new MemoryStorage();
     AppContext context = new AppContext();
@@ -357,7 +351,7 @@ public final class RepairRunnerTest {
 
     storage.addCluster(new Cluster(CLUSTER_NAME, null, Collections.<String>singleton("127.0.0.1")));
     UUID cf = storage
-        .addRepairUnit(new RepairUnit.Builder(CLUSTER_NAME, KS_NAME, CF_NAMES, INCREMENTAL_REPAIR, NODES, DATACENTERS))
+        .addRepairUnit(new RepairUnit.Builder(CLUSTER_NAME, KS_NAME, CF_NAMES, INCREMENTAL_REPAIR, NODES, DATACENTERS, JOB_THREADS))
         .getId();
     DateTimeUtils.setCurrentMillisFixed(TIME_RUN);
     RepairRun run = storage.addRepairRun(
@@ -393,7 +387,8 @@ public final class RepairRunnerTest {
             any(RepairParallelism.class),
             any(),
             anyBoolean(),
-            any()))
+            any(),
+            anyInt()))
             .then((invocation) -> {
 
               assertEquals(

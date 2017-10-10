@@ -14,6 +14,8 @@
 
 package io.cassandrareaper.unit.service;
 
+import com.datastax.driver.core.utils.UUIDs;
+import com.google.common.collect.Sets;
 import io.cassandrareaper.AppContext;
 import io.cassandrareaper.ReaperApplicationConfiguration;
 import io.cassandrareaper.ReaperException;
@@ -26,20 +28,17 @@ import io.cassandrareaper.service.RepairRunner;
 import io.cassandrareaper.service.RingRange;
 import io.cassandrareaper.storage.IDistributedStorage;
 import io.cassandrareaper.storage.IStorage;
+import org.apache.cassandra.repair.RepairParallelism;
+import org.joda.time.DateTime;
+import org.junit.Test;
+import org.mockito.ArgumentMatcher;
+import org.mockito.Mockito;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-
-import com.datastax.driver.core.utils.UUIDs;
-import com.google.common.collect.Sets;
-import org.apache.cassandra.repair.RepairParallelism;
-import org.joda.time.DateTime;
-import org.junit.Test;
-import org.mockito.ArgumentMatcher;
-import org.mockito.Mockito;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -62,6 +61,7 @@ public class RepairManagerTest {
     final Set<String> nodes = Sets.newHashSet("127.0.0.1");
     final Set<String> datacenters = Collections.emptySet();
     final double intensity = 0.5f;
+    final int jobThreads = 2;
 
     final IStorage storage = mock(ICassandraStorageInterface.class);
     RepairManager repairManager = new RepairManager();
@@ -78,7 +78,7 @@ public class RepairManagerTest {
     context.config.setLocalJmxMode(false);
 
     final RepairUnit cf =
-        new RepairUnit.Builder(clusterName, ksName, cfNames, incrementalRepair, nodes, datacenters)
+        new RepairUnit.Builder(clusterName, ksName, cfNames, incrementalRepair, nodes, datacenters, jobThreads)
             .build(UUIDs.timeBased());
 
     final RepairRun run =
@@ -125,6 +125,7 @@ public class RepairManagerTest {
     final Set<String> nodes = Sets.newHashSet("127.0.0.1");
     final Set<String> datacenters = Collections.emptySet();
     final double intensity = 0.5f;
+    final int jobThreads = 2;
 
     final IStorage storage = mock(ICassandraStorageInterface.class);
     RepairManager repairManager = new RepairManager();
@@ -141,7 +142,7 @@ public class RepairManagerTest {
     context.config.setLocalJmxMode(false);
 
     final RepairUnit cf =
-        new RepairUnit.Builder(clusterName, ksName, cfNames, incrementalRepair, nodes, datacenters)
+        new RepairUnit.Builder(clusterName, ksName, cfNames, incrementalRepair, nodes, datacenters, jobThreads)
             .build(UUIDs.timeBased());
 
     final RepairRun run =
@@ -190,6 +191,7 @@ public class RepairManagerTest {
     final Set<String> nodes = Sets.newHashSet("127.0.0.1");
     final Set<String> datacenters = Collections.emptySet();
     final double intensity = 0.5f;
+    final int jobThreads = 2;
 
     final IStorage storage = mock(IStorage.class);
     RepairManager repairManager = new RepairManager();
@@ -206,7 +208,7 @@ public class RepairManagerTest {
     context.config.setLocalJmxMode(false);
 
     final RepairUnit cf =
-        new RepairUnit.Builder(clusterName, ksName, cfNames, incrementalRepair, nodes, datacenters)
+        new RepairUnit.Builder(clusterName, ksName, cfNames, incrementalRepair, nodes, datacenters, jobThreads)
             .build(UUIDs.timeBased());
 
     final RepairRun run =
@@ -252,6 +254,7 @@ public class RepairManagerTest {
     final Set<String> nodes = Sets.newHashSet("127.0.0.1");
     final Set<String> datacenters = Collections.emptySet();
     final double intensity = 0.5f;
+    final int jobThreads = 2;
 
     final IStorage storage = mock(IStorage.class);
     RepairManager repairManager = new RepairManager();
@@ -268,7 +271,7 @@ public class RepairManagerTest {
     context.config.setLocalJmxMode(false);
 
     final RepairUnit cf =
-        new RepairUnit.Builder(clusterName, ksName, cfNames, incrementalRepair, nodes, datacenters)
+        new RepairUnit.Builder(clusterName, ksName, cfNames, incrementalRepair, nodes, datacenters, jobThreads)
             .build(UUIDs.timeBased());
 
     final RepairRun run =

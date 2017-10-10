@@ -14,6 +14,10 @@
 
 package io.cassandrareaper.unit.resources;
 
+import com.datastax.driver.core.utils.UUIDs;
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import io.cassandrareaper.AppContext;
 import io.cassandrareaper.ReaperApplicationConfiguration;
 import io.cassandrareaper.ReaperException;
@@ -31,36 +35,21 @@ import io.cassandrareaper.service.RingRange;
 import io.cassandrareaper.service.SegmentRunner;
 import io.cassandrareaper.storage.MemoryStorage;
 import io.cassandrareaper.unit.service.RepairRunnerTest;
-
-import java.math.BigInteger;
-import java.net.URI;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-
-import com.datastax.driver.core.utils.UUIDs;
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import org.apache.cassandra.repair.RepairParallelism;
 import org.assertj.core.util.Maps;
 import org.joda.time.DateTimeUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyCollectionOf;
-import static org.mockito.ArgumentMatchers.anyString;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import java.math.BigInteger;
+import java.net.URI;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -84,6 +73,7 @@ public final class RepairRunResourceTest {
   private static final URI SAMPLE_URI = URI.create("http://test");
   private static final int SEGMENT_CNT = 6;
   private static final double REPAIR_INTENSITY = 0.5f;
+  private static final int JOB_THREADS = 2;
   private static final RepairParallelism REPAIR_PARALLELISM = RepairParallelism.SEQUENTIAL;
 
   private static final List<BigInteger> TOKENS = Lists.newArrayList(
@@ -124,7 +114,7 @@ public final class RepairRunResourceTest {
         Collections.singletonList(""));
     when(proxy.getRangeToEndpointMap(anyString())).thenReturn(RepairRunnerTest.sixNodeCluster());
     when(proxy.triggerRepair(any(BigInteger.class), any(BigInteger.class), anyString(),
-        any(RepairParallelism.class), anyCollectionOf(String.class), anyBoolean(), anyCollectionOf(String.class)))
+        any(RepairParallelism.class), anyCollectionOf(String.class), anyBoolean(), anyCollectionOf(String.class), anyInt()))
         .thenReturn(1);
 
     context.jmxConnectionFactory = new JmxConnectionFactory() {
@@ -136,7 +126,7 @@ public final class RepairRunResourceTest {
     };
 
     RepairUnit.Builder repairUnitBuilder = new RepairUnit
-        .Builder(CLUSTER_NAME, KEYSPACE, TABLES, INCREMENTAL, NODES, DATACENTERS);
+        .Builder(CLUSTER_NAME, KEYSPACE, TABLES, INCREMENTAL, NODES, DATACENTERS, JOB_THREADS);
 
     context.storage.addRepairUnit(repairUnitBuilder);
   }
@@ -165,6 +155,7 @@ public final class RepairRunResourceTest {
         Optional.fromNullable(cause),
         Optional.fromNullable(segments),
         Optional.of(REPAIR_PARALLELISM.name()),
+        Optional.<String>absent(),
         Optional.<String>absent(),
         Optional.<String>absent(),
         nodes == null || nodes.isEmpty() ? Optional.<String>absent() : Optional.of(nodes.iterator().next()),
