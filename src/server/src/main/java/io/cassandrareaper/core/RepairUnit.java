@@ -67,7 +67,9 @@ public final class RepairUnit {
     return datacenters;
   }
 
-  public Integer getJobThreads() { return jobThreads; }
+  public Integer getJobThreads() {
+    return jobThreads;
+  }
 
   public Builder with() {
     return new Builder(this);
