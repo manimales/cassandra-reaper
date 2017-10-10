@@ -487,8 +487,7 @@ public final class CommonTools {
           keyspace,
           tableNames,
           nodesToRepair,
-          datacenters,
-          jobThreads);
+          datacenters);
       theRepairUnit = storedRepairUnit.get();
     } else {
       LOG.info(
@@ -497,8 +496,7 @@ public final class CommonTools {
           keyspace,
           tableNames,
           nodesToRepair,
-          datacenters,
-          jobThreads);
+          datacenters);
       theRepairUnit = context.storage.addRepairUnit(
           new RepairUnit.Builder(
               cluster.getName(), keyspace, tableNames, incrementalRepair, nodesToRepair, datacenters, jobThreads));
