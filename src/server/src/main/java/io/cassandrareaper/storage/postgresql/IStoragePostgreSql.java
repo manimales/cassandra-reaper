@@ -14,18 +14,28 @@
 
 package io.cassandrareaper.storage.postgresql;
 
-import io.cassandrareaper.core.*;
+import io.cassandrareaper.core.Cluster;
+import io.cassandrareaper.core.RepairRun;
+import io.cassandrareaper.core.RepairSchedule;
+import io.cassandrareaper.core.RepairSegment;
+import io.cassandrareaper.core.RepairUnit;
 import io.cassandrareaper.resources.view.RepairRunStatus;
 import io.cassandrareaper.resources.view.RepairScheduleStatus;
 import io.cassandrareaper.service.RepairParameters;
-import org.skife.jdbi.v2.sqlobject.*;
-import org.skife.jdbi.v2.sqlobject.customizers.BatchChunkSize;
-import org.skife.jdbi.v2.sqlobject.customizers.Mapper;
 
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+
+import org.skife.jdbi.v2.sqlobject.Bind;
+import org.skife.jdbi.v2.sqlobject.BindBean;
+import org.skife.jdbi.v2.sqlobject.GetGeneratedKeys;
+import org.skife.jdbi.v2.sqlobject.SqlBatch;
+import org.skife.jdbi.v2.sqlobject.SqlQuery;
+import org.skife.jdbi.v2.sqlobject.SqlUpdate;
+import org.skife.jdbi.v2.sqlobject.customizers.BatchChunkSize;
+import org.skife.jdbi.v2.sqlobject.customizers.Mapper;
 
 /**
  * JDBI based PostgreSQL interface.

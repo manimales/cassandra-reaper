@@ -14,21 +14,21 @@
 
 package io.cassandrareaper;
 
+import java.time.Duration;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.DefaultValue;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
 import org.apache.cassandra.repair.RepairParallelism;
 import org.hibernate.validator.constraints.NotEmpty;
 import systems.composable.dropwizard.cassandra.CassandraFactory;
-
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.DefaultValue;
-import java.time.Duration;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 public final class ReaperApplicationConfiguration extends Configuration {
 

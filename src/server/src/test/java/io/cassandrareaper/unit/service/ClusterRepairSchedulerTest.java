@@ -14,10 +14,6 @@
 
 package io.cassandrareaper.unit.service;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import io.cassandrareaper.AppContext;
 import io.cassandrareaper.ReaperApplicationConfiguration;
 import io.cassandrareaper.ReaperException;
@@ -28,14 +24,19 @@ import io.cassandrareaper.jmx.JmxConnectionFactory;
 import io.cassandrareaper.jmx.JmxProxy;
 import io.cassandrareaper.service.ClusterRepairScheduler;
 import io.cassandrareaper.storage.MemoryStorage;
-import org.apache.cassandra.repair.RepairParallelism;
-import org.joda.time.DateTime;
-import org.junit.Before;
-import org.junit.Test;
 
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import org.apache.cassandra.repair.RepairParallelism;
+import org.joda.time.DateTime;
+import org.junit.Before;
+import org.junit.Test;
 
 import static java.lang.String.format;
 import static org.fest.assertions.api.Assertions.assertThat;
