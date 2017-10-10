@@ -60,18 +60,18 @@ public interface IStoragePostgreSql {
   //
   String SQL_REPAIR_RUN_ALL_FIELDS_NO_ID = "cluster_name, repair_unit_id, cause, owner, state, creation_time, "
       + "start_time, end_time, pause_time, intensity, last_event, "
-      + "segment_count, repair_parallelism";
+      + "segment_count, repair_parallelism, job_threads";
   String SQL_REPAIR_RUN_ALL_FIELDS = "repair_run.id, " + SQL_REPAIR_RUN_ALL_FIELDS_NO_ID;
   String SQL_INSERT_REPAIR_RUN = "INSERT INTO repair_run ("
       + SQL_REPAIR_RUN_ALL_FIELDS_NO_ID
       + ") VALUES "
       + "(:clusterName, :repairUnitId, :cause, :owner, :runState, :creationTime, "
       + ":startTime, :endTime, :pauseTime, :intensity, :lastEvent, :segmentCount, "
-      + ":repairParallelism)";
+      + ":repairParallelism, :jobThreads)";
   String SQL_UPDATE_REPAIR_RUN = "UPDATE repair_run SET cause = :cause, owner = :owner, state = :runState, "
       + "start_time = :startTime, end_time = :endTime, pause_time = :pauseTime, "
       + "intensity = :intensity, last_event = :lastEvent, segment_count = :segmentCount, "
-      + "repair_parallelism = :repairParallelism WHERE id = :id";
+      + "repair_parallelism = :repairParallelism, job_threads = :jobThreads WHERE id = :id";
   String SQL_GET_REPAIR_RUN = "SELECT " + SQL_REPAIR_RUN_ALL_FIELDS + " FROM repair_run WHERE id = :id";
   String SQL_GET_REPAIR_RUNS_FOR_CLUSTER = "SELECT " + SQL_REPAIR_RUN_ALL_FIELDS
       + " FROM repair_run WHERE cluster_name = :clusterName";

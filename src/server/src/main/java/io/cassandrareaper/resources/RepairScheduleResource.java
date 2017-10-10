@@ -98,7 +98,7 @@ public final class RepairScheduleResource {
     LOG.info(
         "add repair schedule called with: clusterName = {}, keyspace = {}, tables = {}, "
         + "owner = {}, segmentCount = {}, repairParallelism = {}, "
-        + "intensity = {}, incrementalRepair = {}, scheduleDaysBetween = {}, scheduleTriggerTime = {}",
+        + "intensity = {}, jobThreads = {}, incrementalRepair = {}, scheduleDaysBetween = {}, scheduleTriggerTime = {}",
         clusterName,
         keyspace,
         tableNamesParam,

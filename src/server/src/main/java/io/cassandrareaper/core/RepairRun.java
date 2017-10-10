@@ -41,6 +41,7 @@ public final class RepairRun implements Comparable<RepairRun> {
   private final String lastEvent;
   private final int segmentCount;
   private final RepairParallelism repairParallelism;
+  private final int jobThreads;
 
   private RepairRun(Builder builder, UUID id) {
     this.id = id;
@@ -57,6 +58,7 @@ public final class RepairRun implements Comparable<RepairRun> {
     this.lastEvent = builder.lastEvent;
     this.segmentCount = builder.segmentCount;
     this.repairParallelism = builder.repairParallelism;
+    this.jobThreads = builder.jobThreads;
   }
 
   public UUID getId() {
@@ -113,6 +115,10 @@ public final class RepairRun implements Comparable<RepairRun> {
 
   public RepairParallelism getRepairParallelism() {
     return repairParallelism;
+  }
+
+  public int getJobThreads() {
+    return jobThreads;
   }
 
   public Builder with() {
@@ -186,6 +192,7 @@ public final class RepairRun implements Comparable<RepairRun> {
     private String lastEvent = "no events";
     private int segmentCount;
     private RepairParallelism repairParallelism;
+    private int jobThreads;
 
     public Builder(
         String clusterName,
@@ -193,7 +200,8 @@ public final class RepairRun implements Comparable<RepairRun> {
         DateTime creationTime,
         double intensity,
         int segmentCount,
-        RepairParallelism repairParallelism) {
+        RepairParallelism repairParallelism,
+        int jobThreads) {
 
       this.clusterName = clusterName;
       this.repairUnitId = repairUnitId;
@@ -202,6 +210,7 @@ public final class RepairRun implements Comparable<RepairRun> {
       this.intensity = intensity;
       this.segmentCount = segmentCount;
       this.repairParallelism = repairParallelism;
+      this.jobThreads = jobThreads;
     }
 
     private Builder(RepairRun original) {
@@ -218,6 +227,7 @@ public final class RepairRun implements Comparable<RepairRun> {
       lastEvent = original.lastEvent;
       segmentCount = original.segmentCount;
       repairParallelism = original.repairParallelism;
+      jobThreads = original.jobThreads;
     }
 
     public Builder runState(RunState runState) {
@@ -272,6 +282,11 @@ public final class RepairRun implements Comparable<RepairRun> {
 
     public Builder repairParallelism(RepairParallelism repairParallelism) {
       this.repairParallelism = repairParallelism;
+      return this;
+    }
+
+    public Builder jobThreads(int jobThreads) {
+      this.jobThreads = jobThreads;
       return this;
     }
 

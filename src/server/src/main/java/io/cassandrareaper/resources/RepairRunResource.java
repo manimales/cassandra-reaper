@@ -100,8 +100,8 @@ public final class RepairRunResource {
 
     LOG.info(
         "add repair run called with: clusterName = {}, keyspace = {}, tables = {}, owner = {},"
-        + " cause = {}, segmentCount = {}, repairParallelism = {}, intensity = {}, incrementalRepair = {},"
-        + " nodes = {}, datacenters = {} ",
+        + " cause = {}, segmentCount = {}, repairParallelism = {}, intensity = {}, jobThreads = {},"
+        + " incrementalRepair = {}, nodes = {}, datacenters = {} ",
         clusterName,
         keyspace,
         tableNamesParam,
@@ -233,7 +233,8 @@ public final class RepairRunResource {
       }
 
       final RepairRun newRepairRun = CommonTools
-          .registerRepairRun(context, cluster, theRepairUnit, cause, owner.get(), segments, parallelism, intensity);
+          .registerRepairRun(context, cluster, theRepairUnit, cause, owner.get(), segments, parallelism, intensity,
+                             jobThreads);
 
       return Response.created(buildRepairRunUri(uriInfo, newRepairRun))
           .entity(new RepairRunStatus(newRepairRun, theRepairUnit, 0))

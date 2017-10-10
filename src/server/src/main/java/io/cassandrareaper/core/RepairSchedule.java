@@ -117,6 +117,10 @@ public final class RepairSchedule {
     return pauseTime;
   }
 
+  public Integer getJobThreads() {
+    return jobThreads;
+  }
+
   public Builder with() {
     return new Builder(this);
   }

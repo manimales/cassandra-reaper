@@ -82,7 +82,8 @@ public final class CommonTools {
       String owner,
       int segments,
       RepairParallelism repairParallelism,
-      Double intensity)
+      Double intensity,
+      int jobThreads)
       throws ReaperException {
 
     // preparing a repair run involves several steps
@@ -95,7 +96,7 @@ public final class CommonTools {
     segments = repairUnit.getIncrementalRepair() ? nodes.keySet().size() : tokenSegments.size();
 
     RepairRun.Builder runBuilder
-        = createNewRepairRun(cluster, repairUnit, cause, owner, segments, repairParallelism, intensity);
+        = createNewRepairRun(cluster, repairUnit, cause, owner, segments, repairParallelism, intensity, jobThreads);
 
     // the last preparation step is to generate actual repair segments
     List<RepairSegment.Builder> segmentBuilders = repairUnit.getIncrementalRepair()
@@ -223,11 +224,12 @@ public final class CommonTools {
       String owner,
       int segments,
       RepairParallelism repairParallelism,
-      Double intensity)
+      Double intensity,
+      int jobThreads)
       throws ReaperException {
 
     return new RepairRun.Builder(
-        cluster.getName(), repairUnit.getId(), DateTime.now(), intensity, segments, repairParallelism)
+        cluster.getName(), repairUnit.getId(), DateTime.now(), intensity, segments, repairParallelism, jobThreads)
         .cause(cause.isPresent() ? cause.get() : "no cause specified")
         .owner(owner);
   }
@@ -487,7 +489,8 @@ public final class CommonTools {
           keyspace,
           tableNames,
           nodesToRepair,
-          datacenters);
+          datacenters,
+          jobThreads);
       theRepairUnit = storedRepairUnit.get();
     } else {
       LOG.info(
@@ -496,7 +499,8 @@ public final class CommonTools {
           keyspace,
           tableNames,
           nodesToRepair,
-          datacenters);
+          datacenters,
+          jobThreads);
       theRepairUnit = context.storage.addRepairUnit(
           new RepairUnit.Builder(
               cluster.getName(), keyspace, tableNames, incrementalRepair, nodesToRepair, datacenters, jobThreads));

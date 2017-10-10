@@ -62,6 +62,8 @@ import static org.mockito.Mockito.when;
 public final class SegmentRunnerTest {
   // TODO: Clean up tests. There's a lot of code duplication across these tests.
 
+  public static final int JOB_THREADS = 1;
+
   @Before
   public void setUp() throws Exception {
     SegmentRunner.SEGMENT_RUNNERS.clear();
@@ -78,7 +80,7 @@ public final class SegmentRunnerTest {
         new RepairUnit.Builder("reaper", "reaper", Sets.newHashSet("reaper"), false, Sets.newHashSet("127.0.0.1"),
             Collections.emptySet(), 2));
     RepairRun run = context.storage.addRepairRun(
-        new RepairRun.Builder("reaper", cf.getId(), DateTime.now(), 0.5, 1, RepairParallelism.PARALLEL),
+        new RepairRun.Builder("reaper", cf.getId(), DateTime.now(), 0.5, 1, RepairParallelism.PARALLEL, JOB_THREADS),
         Collections.singleton(new RepairSegment.Builder(new RingRange(BigInteger.ONE, BigInteger.ZERO), cf.getId())));
 
     final UUID runId = run.getId();
@@ -164,7 +166,7 @@ public final class SegmentRunnerTest {
         new RepairUnit.Builder("reaper", "reaper", Sets.newHashSet("reaper"), false, Sets.newHashSet("127.0.0.1"),
             Collections.emptySet(), 2));
     RepairRun run = storage.addRepairRun(
-        new RepairRun.Builder("reaper", cf.getId(), DateTime.now(), 0.5, 1, RepairParallelism.PARALLEL),
+        new RepairRun.Builder("reaper", cf.getId(), DateTime.now(), 0.5, 1, RepairParallelism.PARALLEL, JOB_THREADS),
         Collections.singleton(new RepairSegment.Builder(new RingRange(BigInteger.ONE, BigInteger.ZERO), cf.getId())));
     final UUID runId = run.getId();
     final UUID segmentId = storage.getNextFreeSegmentInRange(run.getId(), Optional.absent()).get().getId();
@@ -273,7 +275,7 @@ public final class SegmentRunnerTest {
         new RepairUnit.Builder("reaper", "reaper", Sets.newHashSet("reaper"), false, Sets.newHashSet("127.0.0.1"),
             Collections.emptySet(), 2));
     RepairRun run = storage.addRepairRun(
-        new RepairRun.Builder("reaper", cf.getId(), DateTime.now(), 0.5, 1, RepairParallelism.PARALLEL),
+        new RepairRun.Builder("reaper", cf.getId(), DateTime.now(), 0.5, 1, RepairParallelism.PARALLEL, JOB_THREADS),
         Collections.singleton(new RepairSegment.Builder(new RingRange(BigInteger.ONE, BigInteger.ZERO), cf.getId())));
     final UUID runId = run.getId();
     final UUID segmentId = storage.getNextFreeSegmentInRange(run.getId(), Optional.absent()).get().getId();
