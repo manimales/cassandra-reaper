@@ -18,7 +18,7 @@ const repairForm = React.createClass({
     return {
       addRepairResultMsg: null, clusterNames: [], submitEnabled: false,
       clusterName: this.props.currentCluster!="all"?this.props.currentCluster:this.props.clusterNames[0], keyspace: null, tables: null, owner: null, segments: null,
-      parallism: null, intensity: null, cause: null, incrementalRepair: null, formCollapsed: true, nodes: "", datacenters: "",
+      parallism: null, intensity: null, jobThreads: null, cause: null, incrementalRepair: null, formCollapsed: true, nodes: "", datacenters: "",
       nodeList: [], datacenterList: [], clusterStatus: {}, urlPrefix: URL_PREFIX, nodeSuggestions: [], datacenterSuggestions: []
       
     };
@@ -83,6 +83,7 @@ const repairForm = React.createClass({
     if(this.state.segments) repair.segmentCount = this.state.segments;
     if(this.state.parallism) repair.repairParallelism = this.state.parallism;
     if(this.state.intensity) repair.intensity = this.state.intensity;
+    if(this.state.jobThreads) repair.jobThreads = this.state.jobThreads;
     if(this.state.cause) repair.cause = this.state.cause;
     if(this.state.incrementalRepair) repair.incrementalRepair = this.state.incrementalRepair;
     if(this.state.nodes) repair.nodes = this.state.nodes;
@@ -282,6 +283,14 @@ const repairForm = React.createClass({
                 <input type="number" className="form-control" value={this.state.intensity}
                   min="0" max="1"
                   onChange={this._handleChange} id="in_intensity" placeholder="repair intensity"/>
+              </div>
+            </div>
+            <div className="form-group">
+              <label htmlFor="in_jobThreads" className="col-sm-3 control-label">Job Threads</label>
+              <div className="col-sm-9 col-md-7 col-lg-5">
+                <input type="number" className="form-control" value={this.state.jobThreads}
+                       min="1" max="4"
+                       onChange={this._handleChange} id="in_jobThreads" placeholder="repair job threads"/>
               </div>
             </div>
             <div className="form-group">

@@ -19,7 +19,7 @@ const scheduleForm = React.createClass({
     return {
       addScheduleResultMsg: null, clusterNames: [], submitEnabled: false,
       clusterName: this.props.currentCluster!="all"?this.props.currentCluster:this.props.clusterNames[0], keyspace: null, tables: null, owner: null, segments: null,
-      parallism: null, intensity: null, startTime: null, intervalDays: null, incrementalRepair: null, formCollapsed: true, nodes: null, datacenters: null, 
+      parallism: null, intensity: null, jobThreads: null, startTime: null, intervalDays: null, incrementalRepair: null, formCollapsed: true, nodes: null, datacenters: null,
       nodes: "", datacenters: "", nodeList: [], datacenterList: [], clusterStatus: {}, urlPrefix: URL_PREFIX, nodeSuggestions: [], datacenterSuggestions: []
     };
   },
@@ -82,6 +82,7 @@ const scheduleForm = React.createClass({
     if(this.state.segments) schedule.segmentCount = this.state.segments;
     if(this.state.parallism) schedule.repairParallelism = this.state.parallism;
     if(this.state.intensity) schedule.intensity = this.state.intensity;
+    if(this.state.jobThreads) schedule.jobThreads = this.state.jobThreads;
     if(this.state.incrementalRepair){
       schedule.incrementalRepair = this.state.incrementalRepair;
     }
@@ -283,6 +284,13 @@ const scheduleForm = React.createClass({
               <div className="col-sm-9 col-md-7 col-lg-5">
                 <input type="number" className="form-control" value={this.state.intensity}
                   onChange={this._handleChange} id="in_intensity" placeholder="repair intensity for scheduled repair runs"/>
+              </div>
+            </div>
+            <div className="form-group">
+              <label htmlFor="in_jobThreads" className="col-sm-3 control-label">Repair job threads</label>
+              <div className="col-sm-9 col-md-7 col-lg-5">
+                <input type="number" className="form-control" value={this.state.jobThreads}
+                       onChange={this._handleChange} id="in_jobThreads" placeholder="repair job threads for scheduled repair runs"/>
               </div>
             </div>
             <div className="form-group">
