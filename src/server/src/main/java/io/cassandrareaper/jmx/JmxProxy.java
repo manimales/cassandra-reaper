@@ -664,8 +664,10 @@ public final class JmxProxy implements NotificationListener, AutoCloseable {
       Integer jobThreads) {
 
     if (jobThreads == null || jobThreads > RepairOption.MAX_JOB_THREADS || jobThreads <= 0) {
+      LOG.info("XXX: Setting default number of thread to 1");
       jobThreads = 1;
     }
+    LOG.info("XXX: Number of threads: " + jobThreads.toString());
 
     Map<String, String> options = new HashMap<>();
 
